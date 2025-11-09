@@ -10,10 +10,11 @@ import { Loader2 } from 'lucide-react';
 
 const Signup = () => {
   const [formData, setFormData] = useState({
-    username: '',
+    userName: '',
     email: '',
     mobileNumber: '',
     password: '',
+    monthlyLimit: 10000,
   });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -50,13 +51,13 @@ const Signup = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="userName">Username</Label>
               <Input
-                id="username"
-                name="username"
+                id="userName"
+                name="userName"
                 type="text"
                 placeholder="johndoe"
-                value={formData.username}
+                value={formData.userName}
                 onChange={handleChange}
                 required
                 disabled={loading}

@@ -1,12 +1,55 @@
+import { useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { LogOut, User, Mail } from 'lucide-react';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { LogOut, User, Mail, Loader2, Trash2 } from 'lucide-react';
+import api from '@/services/api';
+import { toast } from 'sonner';
 
 const Settings = () => {
   const { user, logout } = useAuth();
+  const [updateDialogOpen, setUpdateDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formData, setFormData] = useState({
+    userName: user?.username || '',
+    email: user?.email || '',
+  });
+
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setSubmitting(true);
+
+    try {
+      await api.put(`/User/updateUser/${user?.id}`, {
+        userName: formData.userName,
+        email: formData.email,
+      });
+      
+      toast.success('Profile updated successfully!');
+      setUpdateDialogOpen(false);
+    } catch (error: any) {
+      toast.error('Failed to update profile');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    setSubmitting(true);
+
+    try {
+      await api.delete(`/User/deleteUser/${user?.id}`);
+      toast.success('Account deleted successfully');
+      logout();
+    } catch (error: any) {
+      toast.error('Failed to delete account');
+      setSubmitting(false);
+    }
+  };
 
   return (
     <div className="p-8 animate-fade-in">
@@ -48,6 +91,48 @@ const Settings = () => {
                 className="bg-secondary"
               />
             </div>
+            <Dialog open={updateDialogOpen} onOpenChange={setUpdateDialogOpen}>
+              <DialogTrigger asChild>
+                <Button>Update Profile</Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Update Profile</DialogTitle>
+                  <DialogDescription>Edit your account information</DialogDescription>
+                </DialogHeader>
+                <form onSubmit={handleUpdateProfile} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="updateUsername">Username</Label>
+                    <Input
+                      id="updateUsername"
+                      value={formData.userName}
+                      onChange={(e) => setFormData({ ...formData, userName: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="updateEmail">Email</Label>
+                    <Input
+                      id="updateEmail"
+                      type="email"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                    />
+                  </div>
+                  <Button type="submit" className="w-full" disabled={submitting}>
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Updating...
+                      </>
+                    ) : (
+                      'Save Changes'
+                    )}
+                  </Button>
+                </form>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
 
@@ -56,15 +141,52 @@ const Settings = () => {
             <CardTitle className="text-destructive">Danger Zone</CardTitle>
             <CardDescription>Actions that require attention</CardDescription>
           </CardHeader>
-          <CardContent>
+          <CardContent className="space-y-4">
             <Button 
-              variant="destructive" 
+              variant="outline" 
               onClick={logout}
-              className="gap-2"
+              className="gap-2 w-full sm:w-auto"
             >
               <LogOut className="w-4 h-4" />
               Logout from Account
             </Button>
+            
+            <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+              <DialogTrigger asChild>
+                <Button variant="destructive" className="gap-2 w-full sm:w-auto">
+                  <Trash2 className="w-4 h-4" />
+                  Delete Account
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Are you absolutely sure?</DialogTitle>
+                  <DialogDescription>
+                    This action cannot be undone. This will permanently delete your account
+                    and remove all your data from our servers.
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="flex gap-4 justify-end">
+                  <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                    Cancel
+                  </Button>
+                  <Button 
+                    variant="destructive" 
+                    onClick={handleDeleteAccount}
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Deleting...
+                      </>
+                    ) : (
+                      'Delete Account'
+                    )}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </CardContent>
         </Card>
       </div>

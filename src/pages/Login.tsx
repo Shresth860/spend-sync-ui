@@ -20,10 +20,10 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await api.post('/auth/signin', { email, password });
-      const { token, username, email: userEmail } = response.data;
+      const response = await api.post('/auth/login', { email, password });
+      const { id, userName, email: userEmail } = response.data;
       
-      login(token, { username, email: userEmail });
+      login('authenticated', { id, username: userName, email: userEmail });
       toast.success('Welcome back!');
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Invalid credentials. Please try again.';
