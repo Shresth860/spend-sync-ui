@@ -68,15 +68,16 @@ const Signup = () => {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-background">
       {/* Left Side - Hero Image */}
-      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-accent/10 via-primary/10 to-secondary/10">
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-gradient-to-br from-accent/20 via-primary/20 to-accent/10">
+        <div className="absolute inset-0 bg-gradient-to-br from-accent/30 to-primary/30"></div>
         <img 
           src={signupHero} 
           alt="Financial Success" 
-          className="absolute inset-0 w-full h-full object-cover mix-blend-overlay opacity-90"
+          className="absolute inset-0 w-full h-full object-cover opacity-60"
         />
-        <div className="relative z-10 flex flex-col justify-center p-12 text-foreground">
+        <div className="relative z-10 flex flex-col justify-center p-12 text-foreground backdrop-blur-sm">
           <div className="space-y-6 animate-fade-in">
             <h1 className="text-5xl font-bold leading-tight">
               Start Your<br />
