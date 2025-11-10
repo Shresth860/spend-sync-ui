@@ -7,7 +7,7 @@ import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, Di
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Loader2 } from 'lucide-react';
+import { Plus, Loader2, Pencil } from 'lucide-react';
 import api from '@/services/api';
 import { toast } from 'sonner';
 
@@ -25,7 +25,9 @@ const Dashboard = () => {
   const [totalExpenses, setTotalExpenses] = useState(0);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [selectedExpense, setSelectedExpense] = useState<Expense | null>(null);
   const [formData, setFormData] = useState({
     expenseName: '',
     expenseAmount: '',
@@ -83,6 +85,41 @@ const Dashboard = () => {
     } finally {
       setSubmitting(false);
     }
+  };
+
+  const handleUpdateExpense = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedExpense) return;
+    setSubmitting(true);
+
+    try {
+      await api.put(`/expenses/UpdateExpenses/${selectedExpense.id}`, {
+        expenseName: formData.expenseName,
+        expenseAmount: parseFloat(formData.expenseAmount),
+        category: formData.category,
+      });
+      
+      toast.success('Expense updated successfully!');
+      setEditDialogOpen(false);
+      setSelectedExpense(null);
+      setFormData({ expenseName: '', expenseAmount: '', category: '' });
+      fetchExpenses();
+      fetchTotalExpenses();
+    } catch (error: any) {
+      toast.error('Failed to update expense');
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleEditClick = (expense: Expense) => {
+    setSelectedExpense(expense);
+    setFormData({
+      expenseName: expense.expenseName,
+      expenseAmount: expense.expenseAmount.toString(),
+      category: expense.category,
+    });
+    setEditDialogOpen(true);
   };
 
   const handleDeleteExpense = async (expenseId: number) => {
@@ -183,6 +220,67 @@ const Dashboard = () => {
               </form>
             </DialogContent>
           </Dialog>
+          <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Update Expense</DialogTitle>
+                <DialogDescription>Edit the details of your expense</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleUpdateExpense} className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="editExpenseName">Expense Name</Label>
+                  <Input
+                    id="editExpenseName"
+                    value={formData.expenseName}
+                    onChange={(e) => setFormData({ ...formData, expenseName: e.target.value })}
+                    placeholder="e.g., Grocery shopping"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editExpenseAmount">Amount</Label>
+                  <Input
+                    id="editExpenseAmount"
+                    type="number"
+                    step="0.01"
+                    value={formData.expenseAmount}
+                    onChange={(e) => setFormData({ ...formData, expenseAmount: e.target.value })}
+                    placeholder="0.00"
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="editCategory">Category</Label>
+                  <Select
+                    value={formData.category}
+                    onValueChange={(value) => setFormData({ ...formData, category: value })}
+                    required
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select category" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat} value={cat}>
+                          {cat}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button type="submit" className="w-full" disabled={submitting}>
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    'Update Expense'
+                  )}
+                </Button>
+              </form>
+            </DialogContent>
+          </Dialog>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -245,13 +343,23 @@ const Dashboard = () => {
                         ${expense.expenseAmount.toFixed(2)}
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteExpense(expense.id)}
-                        >
-                          Delete
-                        </Button>
+                        <div className="flex gap-2 justify-end">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditClick(expense)}
+                          >
+                            <Pencil className="w-4 h-4 mr-1" />
+                            Edit
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteExpense(expense.id)}
+                          >
+                            Delete
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}

@@ -141,6 +141,20 @@ const Signup = () => {
                 autoComplete="new-password"
               />
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="monthlyLimit">Monthly Spending Limit</Label>
+              <Input
+                id="monthlyLimit"
+                name="monthlyLimit"
+                type="number"
+                placeholder="10000"
+                value={formData.monthlyLimit}
+                onChange={(e) => setFormData({ ...formData, monthlyLimit: parseInt(e.target.value) || 0 })}
+                required
+                disabled={loading}
+                min={0}
+              />
+            </div>
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? (
                 <>

@@ -25,23 +25,30 @@ const Analytics = () => {
       // Fetch category summary
       const categoryResponse = await api.get(`/expenses/CategorySummary/userId/${user?.id}`);
       const categoryMap = categoryResponse.data;
-      const categoryArray = Object.entries(categoryMap).map(([category, amount]) => ({
-        category,
-        amount: amount as number,
-      }));
-      setCategoryData(categoryArray);
+      
+      if (categoryMap && typeof categoryMap === 'object' && Object.keys(categoryMap).length > 0) {
+        const categoryArray = Object.entries(categoryMap).map(([category, amount]) => ({
+          category,
+          amount: amount as number,
+        }));
+        setCategoryData(categoryArray);
+      }
 
       // Fetch monthly report
       const monthlyResponse = await api.get(`/expenses/MonthlyReport/userId/${user?.id}`);
       const monthlyMap = monthlyResponse.data;
-      const monthlyArray = Object.entries(monthlyMap).map(([month, expenses]) => ({
-        month,
-        expenses: expenses as number,
-      }));
-      setMonthlyData(monthlyArray);
+      
+      if (monthlyMap && typeof monthlyMap === 'object' && Object.keys(monthlyMap).length > 0) {
+        const monthlyArray = Object.entries(monthlyMap).map(([month, expenses]) => ({
+          month,
+          expenses: expenses as number,
+        }));
+        setMonthlyData(monthlyArray);
+      }
     } catch (error: any) {
-      toast.error('Failed to load analytics data');
-      console.error('Error fetching analytics:', error);
+      const errorMsg = error?.response?.data?.message || 'Failed to load analytics data';
+      toast.error(errorMsg);
+      console.error('Error fetching analytics:', error?.response || error);
     } finally {
       setLoading(false);
     }

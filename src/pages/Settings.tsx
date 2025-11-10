@@ -17,6 +17,8 @@ const Settings = () => {
   const [formData, setFormData] = useState({
     userName: user?.username || '',
     email: user?.email || '',
+    mobileNumber: '',
+    monthlyLimit: 10000,
   });
 
   const handleUpdateProfile = async (e: React.FormEvent) => {
@@ -27,6 +29,8 @@ const Settings = () => {
       await api.put(`/User/updateUser/${user?.id}`, {
         userName: formData.userName,
         email: formData.email,
+        mobileNumber: formData.mobileNumber,
+        monthlyLimit: formData.monthlyLimit,
       });
       
       toast.success('Profile updated successfully!');
@@ -118,6 +122,27 @@ const Settings = () => {
                       value={formData.email}
                       onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                       required
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="updateMobile">Mobile Number</Label>
+                    <Input
+                      id="updateMobile"
+                      type="tel"
+                      value={formData.mobileNumber}
+                      onChange={(e) => setFormData({ ...formData, mobileNumber: e.target.value })}
+                      placeholder="9876543210"
+                      pattern="^[0-9]{7,15}$"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="updateMonthlyLimit">Monthly Spending Limit</Label>
+                    <Input
+                      id="updateMonthlyLimit"
+                      type="number"
+                      value={formData.monthlyLimit}
+                      onChange={(e) => setFormData({ ...formData, monthlyLimit: parseInt(e.target.value) || 0 })}
+                      min={0}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={submitting}>
