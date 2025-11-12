@@ -111,7 +111,7 @@ const Signup = () => {
       </div>
 
       {/* Right Side - Signup Form */}
-      <div className="flex-1 flex items-center justify-center p-8 bg-background overflow-y-auto">
+      <div className="flex-1 flex items-center justify-center p-4 sm:p-8 bg-background overflow-y-auto">
         <Card className="w-full max-w-md shadow-elevated animate-scale-in border-border/50 my-8">
           <CardHeader className="space-y-2 text-center pb-6">
             <CardTitle className="text-4xl font-bold bg-gradient-primary bg-clip-text text-transparent">
